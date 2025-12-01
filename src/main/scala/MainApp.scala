@@ -6,7 +6,7 @@ object MainApp {
     println("=" * 60)
 
     // Load data - adjust the path according to your project structure
-    val filePath = "src/main/resources/Hotel_Dataset.csv" // or "resources/Hotel_Dataset.csv"
+    val filePath = "src/main/resources/Hotel_Dataset.csv"
     val bookings = DataUtils.loadHotelData(filePath)
 
     println(s"Loaded ${bookings.size} booking records")
