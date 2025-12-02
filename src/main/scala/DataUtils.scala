@@ -1,5 +1,4 @@
 // DataUtils.scala
-// Right-click → New → Scala Class → Kind: Object → Name: DataUtils
 
 import scala.io.Source
 import scala.util.{Try, Using}
