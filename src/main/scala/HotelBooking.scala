@@ -1,5 +1,4 @@
 // HotelBooking.scala
-// Right-click → New → Scala Class → Kind: Case Class → Name: HotelBooking
 
 case class HotelBooking(
                          hotelName: String,
