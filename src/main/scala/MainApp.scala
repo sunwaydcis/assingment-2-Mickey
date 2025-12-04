@@ -1,55 +1,45 @@
-// MainApp.scala
 object MainApp {
 
   def main(args: Array[String]): Unit = {
-    println("Hotel Bookings Data Analysis")
-    println("=" * 60)
+    println("🏨 HOTEL BOOKING DATA ANALYSIS")
+    println("=" * 70)
 
-    // Load data - adjust the path according to your project structure
-    val filePath = "src/main/resources/Hotel_Dataset.csv"
-    val bookings = DataUtils.loadHotelData(filePath)
+    // Find the dataset file
+    val file = DataUtils.findDatasetFile()
 
-    println(s"Loaded ${bookings.size} booking records")
-    println()
+    if (!file.exists()) {
+      println("❌ Error: Hotel_Dataset.csv not found!")
+      println("\n💡 Please place Hotel_Dataset.csv in the project root folder")
+      return
+    }
 
-    // Execute all analyses
+    println(s"✅ Found dataset: ${file.getAbsolutePath}")
+
+    // Load the data
+    println("\n📂 Loading data...")
+    val bookings = DataUtils.loadHotelData(file.getAbsolutePath)
+
+    if (bookings.isEmpty) {
+      println("❌ Failed to load booking data. Cannot proceed.")
+      return
+    }
+
+    runAnalysis(bookings)
+  }
+
+  private def runAnalysis(bookings: List[HotelBooking]): Unit = {
+    println(s"\n✅ Successfully loaded ${bookings.size} booking records")
+    println(s"📊 Dataset Statistics:")
+    println(s"   • Unique hotels: ${bookings.map(_.hotelName).toSet.size}")
+    println(s"   • Unique origin countries: ${bookings.map(_.originCountry).toSet.size}")
+    println(f"   • Total revenue: $$${bookings.map(_.bookingPrice).sum}%.2f")
+    println(f"   • Total visitors: ${bookings.map(_.noOfPeople).sum}")
+
+    // Answer all 3 questions
     Question1Analyzer.analyze(bookings)
     Question2Analyzer.analyze(bookings)
     Question3Analyzer.analyze(bookings)
-
-    // Display polymorphism explanation
-    displayPolymorphismInfo()
   }
 
-  def displayPolymorphismInfo(): Unit = {
-    println("=" * 60)
-    println("POLYMORPHISM IN COLLECTION API")
-    println("=" * 60)
-    println("""
-TYPES OF POLYMORPHISM USED:
 
-1. PARAMETRIC POLYMORPHISM (Generics):
-   - List[HotelBooking], Map[String, Int] - type-safe collections
-   - Methods work with any type: groupBy[A], map[B]
-
-2. SUBTYPE POLYMORPHISM:
-   - HotelBooking extends Analyzable trait
-   - All collections implement Traversable traits
-
-3. HIGHER-ORDER FUNCTIONS:
-   - map, filter, groupBy take functions as parameters
-   - Enables behavior parameterization
-
-BENEFITS DEMONSTRATED:
-- Type Safety: Compile-time checking prevents errors
-- Code Reuse: Same operations work across different data types
-- Flexibility: Easy to modify analysis logic
-- Composition: Operations can be chained (groupBy -> mapValues -> maxBy)
-
-LIMITATIONS:
-- Complexity with nested generics
-- Performance overhead from abstraction
-- Learning curve for functional patterns
-""")
-  }
 }
