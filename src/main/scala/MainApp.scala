@@ -1,11 +1,9 @@
-//MainApp.scala
 object MainApp {
 
   def main(args: Array[String]): Unit = {
     println("🏨 HOTEL BOOKING DATA ANALYSIS")
     println("=" * 70)
-
-    // Find the dataset file
+    
     val file = DataUtils.findDatasetFile()
 
     if (!file.exists()) {
@@ -15,8 +13,7 @@ object MainApp {
     }
 
     println(s"✅ Found dataset: ${file.getAbsolutePath}")
-
-    // Load the data
+    
     println("\n📂 Loading data...")
     val bookings = DataUtils.loadHotelData(file.getAbsolutePath)
 
@@ -35,8 +32,7 @@ object MainApp {
     println(s"   • Unique origin countries: ${bookings.map(_.originCountry).toSet.size}")
     println(f"   • Total revenue: $$${bookings.map(_.bookingPrice).sum}%.2f")
     println(f"   • Total visitors: ${bookings.map(_.noOfPeople).sum}")
-
-    // Answer all 3 questions
+    
     Question1Analyzer.analyze(bookings)
     Question2Analyzer.analyze(bookings)
     Question3Analyzer.analyze(bookings)
