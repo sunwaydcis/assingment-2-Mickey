@@ -12,8 +12,7 @@ object DataUtils {
       println(s"❌ File does not exist: $filePath")
       return List.empty
     }
-
-    // Try different encodings
+    
     val encodings = List("UTF-8", "ISO-8859-1", "Windows-1252", "UTF-16")
 
     for (encoding <- encodings) {
@@ -29,8 +28,7 @@ object DataUtils {
           }
 
           println(s"✅ Successfully read ${lines.size} lines with $encoding encoding")
-
-          // Parse data rows (skip header)
+          
           val bookings = lines.tail.flatMap { line =>
             val fields = line.split(",").map(_.trim)
 
@@ -80,8 +78,7 @@ object DataUtils {
     println("❌ Could not load data with any encoding")
     List.empty
   }
-
-  // Simple safe parsing methods
+  
   private def safeToInt(str: String): Int = {
     Try(str.trim.toInt).getOrElse(0)
   }
@@ -89,8 +86,7 @@ object DataUtils {
   private def safeToDouble(str: String): Double = {
     Try(str.trim.replace("%", "").toDouble).getOrElse(0.0)
   }
-
-  // File finding function
+  
   def findDatasetFile(): File = {
     val possiblePaths = List(
       new File("Hotel_Dataset.csv"),
