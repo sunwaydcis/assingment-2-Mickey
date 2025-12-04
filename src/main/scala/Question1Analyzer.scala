@@ -1,35 +1,34 @@
-// Question1Analyzer.scala
 object Question1Analyzer {
 
-  def findCountryWithHighestBookings(bookings: List[HotelBooking]): (String, Int) = {
-    val countryBookings = bookings.groupBy(_.country)
-      .view
-      .mapValues(_.size)
-      .toMap
-
-    countryBookings.maxBy(_._2)
-  }
-
   def analyze(bookings: List[HotelBooking]): Unit = {
-    val (country, count) = findCountryWithHighestBookings(bookings)
-
-    println("=" * 60)
+    println("\n" + "─" * 70)
     println("QUESTION 1: Which country has the highest number of bookings?")
-    println("=" * 60)
-    println(s"Answer: $country has the highest number of bookings with $count bookings")
+    println("─" * 70)
 
-    // Display top 5 countries
-    val topCountries = bookings.groupBy(_.country)
-      .view
-      .mapValues(_.size)
-      .toList
-      .sortBy(-_._2)
-      .take(5)
-
-    println("\nTop 5 countries by number of bookings:")
-    topCountries.foreach { case (country, count) =>
-      println(s"  - $country: $count bookings")
+    if (bookings.isEmpty) {
+      println("❌ No data available")
+      return
     }
-    println()
+
+    // Use groupBy to group bookings by destination country
+    val bookingsByCountry = bookings.groupBy(_.destinationCountry)
+
+    // Use mapValues to count bookings per country
+    val countryCounts = bookingsByCountry.mapValues(_.size)
+
+    // Use maxBy to find the country with maximum bookings
+    val (topCountry, count) = countryCounts.maxBy(_._2)
+
+    println(s"$topCountry has the highest number of bookings")
+    println(s"Total bookings to $topCountry: $count")
+    println(s"Percentage of all bookings: ${(count.toDouble / bookings.size * 100).formatted("%.1f")}%")
+
+    // Show top 5 countries using sortBy and take
+    println("\nTOP 5 COUNTRIES BY BOOKINGS:")
+    val top5 = countryCounts.toList.sortBy(-_._2).take(5)
+    top5.zipWithIndex.foreach { case ((country, count), index) =>
+      val percentage = (count.toDouble / bookings.size * 100).formatted("%.1f")
+      println(s"   ${index + 1}. $country: $count bookings ($percentage%)")
+    }
   }
 }

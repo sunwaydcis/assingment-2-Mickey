@@ -1,20 +1,35 @@
-// HotelBooking.scala
-// Right-click → New → Scala Class → Kind: Case Class → Name: HotelBooking
-
 case class HotelBooking(
+                         bookingID: String,
+                         dateOfBooking: String,
+                         time: String,
+                         customerID: String,
+                         gender: String,
+                         age: Int,
+                         originCountry: String,
+                         state: String,
+                         location: String,
+                         destinationCountry: String,
+                         destinationCity: String,
+                         noOfPeople: Int,
+                         checkInDate: String,
+                         noOfDays: Int,
+                         checkOutDate: String,
+                         rooms: Int,
                          hotelName: String,
-                         country: String,
+                         hotelRating: Double,
+                         paymentMode: String,
+                         bankName: String,
                          bookingPrice: Double,
-                         discount: Double,
-                         profitMargin: Double,
-                         visitorCount: Int
-                       ) extends Analyzable {
-
-  override def displayInfo(): String = {
-    s"Hotel: $hotelName, Country: $country, Price: $$$bookingPrice, " +
-      s"Discount: $discount%, Profit Margin: $profitMargin%, Visitors: $visitorCount"
+                         discount: String,
+                         gst: Double,
+                         profitMargin: Double
+                       ) {
+  // Extract numeric discount from string like "15%"
+  def discountValue: Double = {
+    try {
+      discount.replace("%", "").trim.toDouble
+    } catch {
+      case _: Exception => 0.0
+    }
   }
-
-  def finalPrice: Double = bookingPrice * (1 - discount/100)
-  def totalProfit: Double = finalPrice * (profitMargin/100)
 }
