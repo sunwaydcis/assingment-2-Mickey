@@ -24,7 +24,7 @@ case class HotelBooking(
                          gst: Double,
                          profitMargin: Double
                        ) {
-  // Extract numeric discount from string like "15%"
+  
   def discountValue: Double = {
     try {
       discount.replace("%", "").trim.toDouble
