@@ -1,9 +1,13 @@
 object MainApp {
-
+  /**
+   * Main entry point demonstrating proper collection workflow:
+   * 1. File discovery → 2. Data loading → 3. Analysis pipeline
+   * Uses Option/validation patterns common in Scala collections.
+   */
   def main(args: Array[String]): Unit = {
     println("🏨 HOTEL BOOKING DATA ANALYSIS")
     println("=" * 70)
-    
+    // Using utility method to find file (returns Option-like behavior)
     val file = DataUtils.findDatasetFile()
 
     if (!file.exists()) {
