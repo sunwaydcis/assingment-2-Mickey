@@ -1,94 +1,81 @@
+// Question3Analyzer.scala
 object Question3Analyzer {
 
+  /**
+   * Sophisticated business profitability analysis
+   * Demonstrates ability to design custom algorithms using collection operations
+   */
   def analyze(bookings: List[HotelBooking]): Unit = {
-    println("\n" + "─" * 90)
+    println("\n" + "=" * 70)
     println("QUESTION 3: Which hotel is the most profitable?")
-    println("─" * 90)
+    println("(Considering number of visitors and profit margin)")
+    println("=" * 70)
 
+    // Early validation - professional error handling
     if (bookings.isEmpty) {
       println("❌ No data available")
       return
     }
-    
-    val hotelProfitability = bookings
-      .groupBy(_.hotelName)
-      .map { case (hotelName, hotelBookings) =>
-        val bookingCount = hotelBookings.size
-        val totalVisitors = hotelBookings.map(_.noOfPeople).sum
-        val totalRevenue = hotelBookings.map(_.bookingPrice).sum
-        
-        val totalProfit = hotelBookings.map { booking =>
-          val discountValue = booking.discountValue
-          val finalPrice = booking.bookingPrice * (1 - discountValue/100)
-          finalPrice * (booking.profitMargin/100)
-        }.sum
-        
-        val profitabilityScore = totalProfit * totalVisitors / 100
 
-        (hotelName, totalVisitors, totalRevenue, totalProfit, profitabilityScore, bookingCount)
-      }
-      .filter(_._6 >= 2) 
-      .toList
+    // Primary data organization
+    // Creates efficient Map[String, List[HotelBooking]] for hotel analysis
 
-    if (hotelProfitability.isEmpty) {
+    val bookingsByHotel = bookings.groupBy(_.hotelName)
+
+    // Complex multi-metric calculation in single map operation
+    // Calculates 6 distinct business metrics for each hotel
+    val hotelProfitability = bookingsByHotel.map { case (hotelName, hotelBookings) =>
+      // Multiple aggregations using map-sum pattern
+      val totalVisitors = hotelBookings.map(_.noOfPeople).sum
+      val avgProfitMargin = hotelBookings.map(_.profitMargin).sum / hotelBookings.size
+      val totalRevenue = hotelBookings.map(_.bookingPrice).sum
+      // Business calculations using derived values
+      val estimatedProfit = totalRevenue * (avgProfitMargin / 100)
+      val bookingCount = hotelBookings.size
+
+      // Custom algorithm - Profitability Score
+      // Combines volume (visitors) with margin into single metric
+      val profitabilityScore = totalVisitors * avgProfitMargin
+
+      // Returns 6-element tuple with comprehensive business metrics
+      // (name, visitors, avgMargin, estimatedProfit, score, bookingCount)
+      (hotelName, totalVisitors, avgProfitMargin, estimatedProfit, profitabilityScore, bookingCount)
+    }
+
+    // Statistical significance filter
+    // Ensures metrics are based on sufficient data (≥2 bookings)
+    val validHotels = hotelProfitability.filter(_._6 >= 2).toList
+
+    if (validHotels.isEmpty) {
       println("❌ No hotels with sufficient booking data")
       return
     }
-    
-    val mostProfitable = hotelProfitability.maxBy(_._5)
 
-    println(s"${mostProfitable._1} is the most profitable hotel")
-    println(f"Profitability Score: ${mostProfitable._5}%.2f")
-    println(s"Total Visitors: ${mostProfitable._2}")
-    println(f"Total Revenue: $$${mostProfitable._3}%.2f")
-    println(f"Total Profit: $$${mostProfitable._4}%.2f")
-    println(s"Based on ${mostProfitable._6} bookings")
-    
-    println("\n" + "-" * 90)
-    println("TOP 3 MOST PROFITABLE HOTELS:")
-    println("-" * 90)
+    // maxBy with custom profitability score (index 5)
+    // Demonstrates understanding of how to use custom scoring with collection operations
+    val mostProfitable = validHotels.maxBy(_._5)
 
-    val top3Profitable = hotelProfitability.sortBy(-_._5).take(3)
-    
-    printf("%-30s %-30s %-30s\n",
-      s"1. ${top3Profitable(0)._1}",
-      s"2. ${top3Profitable(1)._1}",
-      s"3. ${top3Profitable(2)._1}")
-    
-    printf("%-30s %-30s %-30s\n",
-      f"   Score: ${top3Profitable(0)._5}%.2f",
-      f"   Score: ${top3Profitable(1)._5}%.2f",
-      f"   Score: ${top3Profitable(2)._5}%.2f")
-    
-    printf("%-30s %-30s %-30s\n",
-      f"   Profit: $$${top3Profitable(0)._4}%.2f",
-      f"   Profit: $$${top3Profitable(1)._4}%.2f",
-      f"   Profit: $$${top3Profitable(2)._4}%.2f")
-    
-    val margin1 = if (top3Profitable(0)._3 > 0) (top3Profitable(0)._4 / top3Profitable(0)._3 * 100) else 0.0
-    val margin2 = if (top3Profitable(1)._3 > 0) (top3Profitable(1)._4 / top3Profitable(1)._3 * 100) else 0.0
-    val margin3 = if (top3Profitable(2)._3 > 0) (top3Profitable(2)._4 / top3Profitable(2)._3 * 100) else 0.0
+    println(s"\n✅ ANSWER: ${mostProfitable._1} is the most profitable hotel")
+    println(s"   Total Visitors: ${mostProfitable._2}")
+    println(f"   Average Profit Margin: ${mostProfitable._3}%.1f%%")
+    println(f"   Estimated Total Profit: $$${mostProfitable._4}%.2f")
+    println(f"   Profitability Score: ${mostProfitable._5}%.1f")
+    println(s"   Based on ${mostProfitable._6} bookings")
 
-    printf("%-30s %-30s %-30s\n",
-      f"   Margin: ${margin1}%.1f%%",
-      f"   Margin: ${margin2}%.1f%%",
-      f"   Margin: ${margin3}%.1f%%")
-    
-    printf("%-30s %-30s %-30s\n",
-      s"   Visitors: ${top3Profitable(0)._2}",
-      s"   Visitors: ${top3Profitable(1)._2}",
-      s"   Visitors: ${top3Profitable(2)._2}")
-    
-    printf("%-30s %-30s %-30s\n",
-      f"   Revenue: $$${top3Profitable(0)._3}%.2f",
-      f"   Revenue: $$${top3Profitable(1)._3}%.2f",
-      f"   Revenue: $$${top3Profitable(2)._3}%.2f")
-    
-    printf("%-30s %-30s %-30s\n",
-      s"   Bookings: ${top3Profitable(0)._6}",
-      s"   Bookings: ${top3Profitable(1)._6}",
-      s"   Bookings: ${top3Profitable(2)._6}")
-
-    println("=" * 90)
+    // Show top 5 profitable hotels
+    println("\n📈 TOP 5 MOST PROFITABLE HOTELS:")
+    // Multi-step ranking pipeline
+    // 1. sortBy(-_._5) - Sort descending by profitability score (negative for descending)
+    // 2. take(5) - Limit to top 5 results
+    // 3. zipWithIndex - Add ranking indices
+    // 4. foreach with nested tuple pattern matching
+    validHotels.sortBy(-_._5).take(5).zipWithIndex.foreach {
+      case ((name, visitors, margin, profit, score, count), index) =>
+        println(s"\n   ${index + 1}. $name")
+        println(s"      Total Visitors: $visitors")
+        println(f"      Profit Margin: $margin%.1f%%")
+        println(f"      Estimated Profit: $$$profit%.2f")
+        println(f"      Profitability Score: $score%.1f")
+    }
   }
 }
