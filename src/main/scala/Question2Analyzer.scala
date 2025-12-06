@@ -1,99 +1,152 @@
-// Question2Analyzer.scala
 object Question2Analyzer {
   /**
-   * Multi-dimensional analysis using advanced collection operations.
-   * Demonstrates mastery of complex data transformation pipelines.
+   * Sophisticated multi-dimensional economical analysis
+   * Demonstrates advanced collection operations with complex scoring algorithms
    */
   def analyze(bookings: List[HotelBooking]): Unit = {
     println("\n" + "=" * 70)
     println("QUESTION 2: Which hotel offers the most economical option?")
     println("=" * 70)
-
-    // Early validation - prevents processing empty collections
+    // Early validation - professional error handling
     if (bookings.isEmpty) {
       println("❌ No data available")
       return
     }
+    // Multi-level grouping with tuple key
+    // Groups by (hotelName, city, country) for precise location-based analysis
+    // Group by hotel + city + country
+    val hotelStats = bookings
+      .groupBy(b => (b.hotelName, b.destinationCity, b.destinationCountry))
+      .map { case ((hotelName, city, country), hotelBookings) =>
+        // Multiple aggregations in single transformation
+        val bookingCount = hotelBookings.size
+        val avgPrice = hotelBookings.map(_.bookingPrice).sum / bookingCount
+        val avgDiscount = hotelBookings.map(_.discountValue).sum / bookingCount
+        val avgMargin = hotelBookings.map(_.profitMargin).sum / bookingCount
 
-    // Primary grouping operation
-    // Creates Map[String, List[HotelBooking]] keyed by hotel name
-    val bookingsByHotel = bookings.groupBy(_.hotelName)
+        // Returns 7-element tuple with comprehensive hotel statistics
+        (hotelName, city, country, avgPrice, avgDiscount, avgMargin, bookingCount)
+      }
+      .filter(_._7 >= 1)  // Statistical significance filter
+      .toList
 
-    // Complex map transformation with tuple construction
-    // Calculates 5 statistics for each hotel in single pass
-    val hotelStats = bookingsByHotel.map { case (hotelName, hotelBookings) =>
-      // Multiple map-sum operations for statistics
-      val avgPrice = hotelBookings.map(_.bookingPrice).sum / hotelBookings.size
-      val avgDiscount = hotelBookings.map(_.discountValue).sum / hotelBookings.size
-      val avgMargin = hotelBookings.map(_.profitMargin).sum / hotelBookings.size
-      val bookingCount = hotelBookings.size
-
-      // Returns tuple containing all calculated statistics
-      // Format: (name, avgPrice, avgDiscount, avgMargin, bookingCount)
-      (hotelName, avgPrice, avgDiscount, avgMargin, bookingCount)
-    }
-
-    // Statistical significance filter
-    // Filters hotels with insufficient data for reliable averages
-    // Shows understanding of data quality in analysis
-    val validHotels = hotelStats.filter(_._5 >= 2).toList
-
-    if (validHotels.isEmpty) {
+    if (hotelStats.isEmpty) {
       println("❌ No hotels with sufficient booking data")
       return
     }
 
-    // 2a. Most economical by booking price (lowest average price)
-    // minBy on tuple index 1 (average price)
-    val cheapestHotel = validHotels.minBy(_._2)
-    println(s"\n📌 2a) Most economical by BOOKING PRICE:")
-    println(s"   Hotel: ${cheapestHotel._1}")
-    println(f"   Average Price: $$${cheapestHotel._2}%.2f")
-    println(s"   Based on ${cheapestHotel._5} bookings")
+    // Extract specific metrics for normalization
+    val prices = hotelStats.map(_._4)
+    val discounts = hotelStats.map(_._5)
+    val margins = hotelStats.map(_._6)
 
-    // 2b. Most economical by discount (highest average discount)
-    // maxBy on tuple index 2 (average discount)
-    val highestDiscountHotel = validHotels.maxBy(_._3)
-    println(s"\n📌 2b) Most economical by DISCOUNT:")
-    println(s"   Hotel: ${highestDiscountHotel._1}")
-    println(f"   Average Discount: ${highestDiscountHotel._3}%.1f%%")
+    // Find min and max for normalization ranges
+    val minPrice = prices.min
+    val maxPrice = prices.max
+    val minDiscount = discounts.min
+    val maxDiscount = discounts.max
+    val minMargin = margins.min
+    val maxMargin = margins.max
 
-    // Derived calculation within presentation
-    // Effective price = price * (1 - discount/100)
-    val effectivePrice = highestDiscountHotel._2 * (1 - highestDiscountHotel._3/100)
-    println(f"   Effective Price after discount: $$$effectivePrice%.2f")
+    // Calculate normalized scores for each hotel
+    val hotelScores = hotelStats.map {
+      case (hotel, city, country, avgPrice, avgDiscount, avgMargin, count) =>
 
-    // 2c. Most economical by profit margin (lowest profit margin)
-    // minBy on tuple index 3 (profit margin)
-    val lowestMarginHotel = validHotels.minBy(_._4)
-    println(s"\n📌 2c) Most economical by PROFIT MARGIN:")
-    println(s"   Hotel: ${lowestMarginHotel._1}")
-    println(f"   Average Profit Margin: ${lowestMarginHotel._4}%.1f%%")
-    println(s"   (Lower profit margin often means better value for customers)")
+        // Normalize price: lower price = higher score
+        val priceScore = if (maxPrice - minPrice > 0)
+          (1 - ((avgPrice - minPrice) / (maxPrice - minPrice))) * 100
+        else 50.0
 
-    // Show summary table of top 5 economical hotels
-    println("\n📋 SUMMARY: Top 5 Most Economical Hotels (by effective price):")
-    // Complex transformation pipeline
-    // 1. Map to add calculated effective price
-    // 2. Creates 6-element tuple with all relevant metrics
-    val economicalHotels = validHotels.map { case (name, price, discount, margin, count) =>
-      val effectivePrice = price * (1 - discount/100)
-      (name, effectivePrice, price, discount, margin, count)
+        // Normalize discount: higher discount = higher score
+        val discountScore = if (maxDiscount - minDiscount > 0)
+          ((avgDiscount - minDiscount) / (maxDiscount - minDiscount)) * 100
+        else 50.0
+
+        // Normalize profit margin: lower margin = higher score
+        val marginScore = if (maxMargin - minMargin > 0)
+          (1 - ((avgMargin - minMargin) / (maxMargin - minMargin))) * 100
+        else 50.0
+
+        // Composite score: average of three normalized scores
+        val compositeScore = (priceScore + discountScore + marginScore) / 3.0
+        // 8-element tuple with all calculated metrics
+        (hotel, city, country, avgPrice, avgDiscount, avgMargin, count, compositeScore)
     }
 
-    // Multi-step collection pipeline for ranking
-    // 1. sortBy on effective price (index 1 in new tuple)
-    // 2. take(5) for top results
-    // 3. zipWithIndex for ranking
-    // 4. foreach with nested tuple pattern matching
-    economicalHotels.sortBy(_._2).take(5).zipWithIndex.foreach {
-      case ((name, effectivePrice, price, discount, margin, count), index) =>
-        println(s"\n   ${index + 1}. $name")
-        println(f"      Effective Price: $$$effectivePrice%.2f")
-        println(f"      Original Price: $$$price%.2f")
-        println(f"      Average Discount: $discount%.1f%%")
-        println(f"      Profit Margin: $margin%.1f%%")
-        println(s"      Based on $count bookings")
-    }
+    // Find hotel location with the highest composite score
+    val (bestHotel, bestCity, bestCountry, bestAvgPrice, bestAvgDiscount, bestAvgMargin, bestCount, bestCompositeScore) =
+      hotelScores.maxBy(_._8)
+
+    // Primary answer with detailed metrics
+    println("\n 2. MOST ECONOMICAL HOTEL")
+    println(s"   ► Hotel: $bestHotel")
+    println(s"   ► City: $bestCity")
+    println(s"   ► Country: $bestCountry")
+    println(f"   ► Final Score: $bestCompositeScore%.2f")
+    println(f"   ► Average Price: $$$bestAvgPrice%.2f")
+    println(f"   ► Average Discount: $bestAvgDiscount%.1f%%")
+    println(f"   ► Average Profit Margin: ${bestAvgMargin * 100}%.1f%%")
+    println(s"   ► Transactions: $bestCount")
+
+    // Show top 3 hotels in horizontal format
+    println("\n" + "-" * 90)
+    println("TOP 3 MOST ECONOMICAL HOTELS:")
+    println("-" * 90)
+
+    val top3Hotels = hotelScores.sortBy(-_._8).take(3)
+    // Multi-column formatted output using printf
+    // Creates professional table-like comparison
+
+    // Headers with ranking
+    println()
+    println()
+    printf("%-30s %-30s %-30s\n",
+      s"1. ${top3Hotels(0)._1}",
+      s"2. ${top3Hotels(1)._1}",
+      s"3. ${top3Hotels(2)._1}")
+
+    // Print city and country
+    printf("%-30s %-30s %-30s\n",
+      s"   ${top3Hotels(0)._2}, ${top3Hotels(0)._3}",
+      s"   ${top3Hotels(1)._2}, ${top3Hotels(1)._3}",
+      s"   ${top3Hotels(2)._2}, ${top3Hotels(2)._3}")
+
+    // Location information
+    printf("%-30s %-30s %-30s\n",
+      f"   Score: ${top3Hotels(0)._8}%.2f",
+      f"   Score: ${top3Hotels(1)._8}%.2f",
+      f"   Score: ${top3Hotels(2)._8}%.2f")
+
+    // Print Average Price
+    printf("%-30s %-30s %-30s\n",
+      f"   Price: $$${top3Hotels(0)._4}%.2f",
+      f"   Price: $$${top3Hotels(1)._4}%.2f",
+      f"   Price: $$${top3Hotels(2)._4}%.2f")
+
+    // Print Average Discount
+    printf("%-30s %-30s %-30s\n",
+      f"   Discount: ${top3Hotels(0)._5}%.1f%%",
+      f"   Discount: ${top3Hotels(1)._5}%.1f%%",
+      f"   Discount: ${top3Hotels(2)._5}%.1f%%")
+
+    // Print Average Profit Margin
+    printf("%-30s %-30s %-30s\n",
+      f"   Margin: ${top3Hotels(0)._6 * 100}%.1f%%",
+      f"   Margin: ${top3Hotels(1)._6 * 100}%.1f%%",
+      f"   Margin: ${top3Hotels(2)._6 * 100}%.1f%%")
+
+    // Print Effective Price (price after discount)
+    printf("%-30s %-30s %-30s\n",
+      f"   Eff. Price: $$${top3Hotels(0)._4 * (1 - top3Hotels(0)._5/100)}%.2f",
+      f"   Eff. Price: $$${top3Hotels(1)._4 * (1 - top3Hotels(1)._5/100)}%.2f",
+      f"   Eff. Price: $$${top3Hotels(2)._4 * (1 - top3Hotels(2)._5/100)}%.2f")
+
+    // Print Transactions
+    printf("%-30s %-30s %-30s\n",
+      s"   Transactions: ${top3Hotels(0)._7}",
+      s"   Transactions: ${top3Hotels(1)._7}",
+      s"   Transactions: ${top3Hotels(2)._7}")
+
+    println("=" * 90)
   }
 }
