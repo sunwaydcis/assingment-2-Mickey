@@ -25,7 +25,7 @@ object Question3Analyzer {
     // Complex multi-metric calculation in single map operation
     // Calculates 6 distinct business metrics for each hotel
     val hotelProfitability = bookingsByHotel.map { case (hotelName, hotelBookings) =>
-      // Collection API: Multiple aggregations using map-sum pattern
+      // Multiple aggregations using map-sum pattern
       val totalVisitors = hotelBookings.map(_.noOfPeople).sum
       val avgProfitMargin = hotelBookings.map(_.profitMargin).sum / hotelBookings.size
       val totalRevenue = hotelBookings.map(_.bookingPrice).sum
