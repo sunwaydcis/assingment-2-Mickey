@@ -1,5 +1,5 @@
 object MainApp {
-//scala
+
   def main(args: Array[String]): Unit = {
     println("🏨 HOTEL BOOKING DATA ANALYSIS")
     println("=" * 70)
